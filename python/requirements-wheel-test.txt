@@ -1,5 +1,5 @@
 cffi
-cython
+cython == 0.29.28
 hypothesis
 pickle5; platform_system != "Windows" and python_version < "3.8"
 pytest

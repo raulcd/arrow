@@ -633,7 +633,7 @@ setup(
                                  'pyarrow/_generated_version.py'),
         'version_scheme': guess_next_dev_version
     },
-    setup_requires=['setuptools_scm', 'cython >= 0.29'] + setup_requires,
+    setup_requires=['setuptools_scm', 'cython == 0.29.28'] + setup_requires,
     install_requires=install_requires,
     tests_require=['pytest', 'pandas', 'hypothesis'],
     python_requires='>=3.7',
