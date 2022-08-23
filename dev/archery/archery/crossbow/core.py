@@ -378,7 +378,10 @@ class Repo:
         if parents is None:
             # by default use the main branch as the base of the new branch
             # required to reuse github actions cache across crossbow tasks
-            commit, _ = self.repo.resolve_refish("master")
+            try:
+                commit, _ = self.repo.resolve_refish("master")
+            except KeyError:
+                commit, _ = self.repo.resolve_refish("main")
             parents = [commit.id]
         tree_id = self.create_tree(files)
 
