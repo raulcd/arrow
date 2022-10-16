@@ -69,6 +69,7 @@ class Report:
 
     def task_url(self, task):
         if self._wait_for_task:
+            print("Waiting for task")
             time.sleep(self._wait_for_task)
         if task.status().build_links:
             # show link to the actual build, some CI providers implement
