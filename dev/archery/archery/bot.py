@@ -187,6 +187,9 @@ def crossbow(obj, crossbow):
     obj['crossbow_repo'] = crossbow
 
 
+def create_fake_function():
+    pass
+
 def _clone_arrow_and_crossbow(dest, crossbow_repo, pull_request):
     """
     Clone the repositories and initialize crossbow objects.
