@@ -31,15 +31,29 @@ permissions:
 jobs:
   crossbow:
     name: Listen!
-    if: startsWith(github.event.comment.body, '@github-actions crossbow')
+    if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '@github-actions crossbow')}}
     runs-on: ubuntu-latest
     steps:
+      - name: Get PR SHA
+        id: sha
+        uses: actions/github-script@v4
+        with:
+          result-encoding: string
+          script: |
+            const { owner, repo, number } = context.issue;
+            const pr = await github.pulls.get({
+              owner,
+              repo,
+              pull_number: number,
+            });
+            return pr.data.head.sha
       - name: Checkout Arrow
         uses: actions/checkout@v3
         with:
           path: arrow
           # fetch the tags for version number generation
           fetch-depth: 0
+          ref: ${{ steps.sha.outputs.result }}
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
