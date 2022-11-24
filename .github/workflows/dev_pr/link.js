@@ -61,7 +61,7 @@ async function commentGitHubURL(github, context, pullRequestNumber, issueID) {
     owner: context.repo.owner,
     repo: context.repo.repo,
     issue_number: pullRequestNumber,
-    body: "* GitHub issue: [" + issueInfo.title + ": #" + issueID + "](" + issueInfo.html_url + ")"
+    body: "* [ ] #" + issueID
   });
 }
 
