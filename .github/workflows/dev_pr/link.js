@@ -52,7 +52,7 @@ async function commentJIRAURL(github, context, pullRequestNumber, jiraID) {
 }
 
 async function commentGitHubURL(github, context, pullRequestNumber, issueID) {
-  const issueInfo = await helpers.getGitHubInfo(github, issueID, context);
+  //const issueInfo = await helpers.getGitHubInfo(github, context, issueID);
   // TODO: Remove this to check if comment is already there
   //if (await haveComment(github, context, pullRequestNumber, jiraURL)) {
   //  return;
@@ -61,7 +61,7 @@ async function commentGitHubURL(github, context, pullRequestNumber, issueID) {
     owner: context.repo.owner,
     repo: context.repo.repo,
     issue_number: pullRequestNumber,
-    body: "* [ ] #" + issueID
+    body: "* Github Issue: #" + issueID
   });
 }
 

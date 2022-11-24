@@ -79,14 +79,10 @@ async function commentNotStartedTicket(github, context, pullRequestNumber) {
 }
 
 async function verifyGitHubIssue(github, context, pullRequestNumber, issueID) {
-    const response = await github.issues.get({
-        issue_number: issueID,
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-      })
+    const issueInfo = await helpers.getGitHubInfo(github, context, issueID);
     // TODO: Remove console.log
-    console.log(response)
-    if (response.status != 200) {
+    console.log(issueInfo)
+    if (!issueInfo) {
         await github.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
@@ -95,7 +91,7 @@ async function verifyGitHubIssue(github, context, pullRequestNumber, issueID) {
         })
         return null
     }
-    if (!response.data.assignees.length) {
+    if (!issueInfo.assignees.length) {
         await github.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
@@ -103,7 +99,7 @@ async function verifyGitHubIssue(github, context, pullRequestNumber, issueID) {
             body: ":warning: GitHub issue #" + issueID + " **has not been assigned in GitHub**, please assign the ticket."
         })
     }
-    if(!response.data.labels.length) {
+    if(!issueInfo.labels.length) {
         await github.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,

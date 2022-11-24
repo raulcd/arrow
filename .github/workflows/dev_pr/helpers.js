@@ -77,7 +77,7 @@ async function getJiraInfo(jiraID) {
  * @param {String} issueID
  * @returns {Object} the information about a GitHub issue.
  */
- async function getGitHubInfo(github, issueID, context) {
+ async function getGitHubInfo(github, context, issueID) {
     const response = await github.issues.get({
         issue_number: issueID,
         owner: context.repo.owner,
