@@ -108,5 +108,6 @@ module.exports = {
     detectIssueID,
     haveJIRAID,
     getJiraInfo,
-    haveGitHubIssueID
+    haveGitHubIssueID,
+    getGitHubInfo
 };
