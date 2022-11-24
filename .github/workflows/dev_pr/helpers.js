@@ -27,10 +27,13 @@ function detectIssueID(title) {
         return null;
     }
     const matched = /^(WIP:?\s*)?((ARROW|PARQUET|GH)-\d+)/.exec(title);
-    if (!matched) {
-        return null;
+    const matched_gh = /^(WIP:?\s*)?(GH-)(\d+)/.exec(title);
+    if (matched) {
+        return matched[2];
+    } else if (matched_gh) {
+        return matched_gh[3]
     }
-    return matched[2];
+    return null;
 }
 
 /**
