@@ -52,7 +52,7 @@ async function commentJIRAURL(github, context, pullRequestNumber, jiraID) {
 }
 
 async function commentGitHubURL(github, context, pullRequestNumber, issueID) {
-  const issueInfo = await helpers.getGitHubInfo(issueID);
+  const issueInfo = await helpers.getGitHubInfo(github, issueID, context);
   // TODO: Remove this to check if comment is already there
   //if (await haveComment(github, context, pullRequestNumber, jiraURL)) {
   //  return;
