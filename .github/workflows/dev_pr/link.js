@@ -52,8 +52,7 @@ async function commentJIRAURL(github, context, pullRequestNumber, jiraID) {
 }
 
 async function commentGitHubURL(github, context, pullRequestNumber, issueID) {
-  // TODO: Change url and probably use the issues endpoint to retrieve it
-  const issueURL = `https://github.com/raulcd/arrow/issues/${issueID}`;
+  const issueInfo = await helpers.getGitHubInfo(issueID);
   // TODO: Remove this to check if comment is already there
   //if (await haveComment(github, context, pullRequestNumber, jiraURL)) {
   //  return;
@@ -62,7 +61,7 @@ async function commentGitHubURL(github, context, pullRequestNumber, issueID) {
     owner: context.repo.owner,
     repo: context.repo.repo,
     issue_number: pullRequestNumber,
-    body: "* GitHub issue: [TODO Add title: #" + issueID + "](" + issueURL + ")"
+    body: "* GitHub issue: [" + issueInfo.title + ": #" + issueID + "](" + issueInfo.html_url + ")"
   });
 }
 

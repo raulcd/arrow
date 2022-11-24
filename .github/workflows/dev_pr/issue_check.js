@@ -84,6 +84,7 @@ async function verifyGitHubIssue(github, context, pullRequestNumber, issueID) {
         owner: context.repo.owner,
         repo: context.repo.repo,
       })
+    // TODO: Remove console.log
     console.log(response)
     if (response.status != 200) {
         await github.issues.createComment({
@@ -107,7 +108,7 @@ async function verifyGitHubIssue(github, context, pullRequestNumber, issueID) {
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: pullRequestNumber,
-            body: ":warning: GitHub issue #" + issueID + " **has no components in GitHub**, please add components."
+            body: ":warning: GitHub issue #" + issueID + " **has no labels in GitHub**, please add labels for components."
         })
     }
 }
