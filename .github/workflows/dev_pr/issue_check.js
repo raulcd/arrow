@@ -79,11 +79,20 @@ async function commentNotStartedTicket(github, context, pullRequestNumber) {
 }
 
 async function verifyGitHubIssue(github, context, pullRequestNumber, issueID) {
-    const issue = await github.issues.get({
+    const issues = await github.issues.get({
         issue_number: issueID,
         owner: context.repo.owner,
         repo: context.repo.repo,
       })
+    if (issues.length != 1) {
+        await github.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: pullRequestNumber,
+            body: ":warning: GitHub issue #" + issueID + " could not be found."
+        })
+    }
+    const issue = issues[0]
     if (!issue.assignees.length) {
         await github.issues.createComment({
             owner: context.repo.owner,
