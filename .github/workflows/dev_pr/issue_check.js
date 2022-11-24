@@ -84,21 +84,22 @@ async function verifyGitHubIssue(github, context, pullRequestNumber, issueID) {
         owner: context.repo.owner,
         repo: context.repo.repo,
       })
-    await github.issues.createComment({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: pullRequestNumber,
-        body: ":warning: Ticket **has not been started in JIRA**, please click 'Start Progress'." + issue
-    })
-    //if(!ticketInfo["fields"]["components"].length) {
-    //    await commentMissingComponents(github, context, pullRequestNumber);
-    //}
-
-    //if(ticketInfo["fields"]["status"]["id"] == 1) {
-    //    // "status": {"name":"Open","id":"1"
-    //    //            "description":"The issue is open and ready for the assignee to start work on it.", 
-    //    await commentNotStartedTicket(github, context, pullRequestNumber);
-    //}
+    if (!issue.assignees.length) {
+        await github.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: pullRequestNumber,
+            body: ":warning: GitHub issue #" + issueID + " **has not been assigned in GitHub**, please assign the ticket."
+        })
+    }
+    if(!issue.labels.length) {
+        await github.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: pullRequestNumber,
+            body: ":warning: GitHub issue #" + issueID + " **has no components in GitHub**, please add components."
+        })
+    }
 }
 
 module.exports = async ({github, context}) => {
