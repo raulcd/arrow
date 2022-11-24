@@ -26,7 +26,7 @@ function detectIssueID(title) {
     if (!title) {
         return null;
     }
-    const matched = /^(WIP:?\s*)?((ARROW|PARQUET|GH)-\d+)/.exec(title);
+    const matched = /^(WIP:?\s*)?((ARROW|PARQUET)-\d+)/.exec(title);
     const matched_gh = /^(WIP:?\s*)?(GH-)(\d+)/.exec(title);
     if (matched) {
         return matched[2];
