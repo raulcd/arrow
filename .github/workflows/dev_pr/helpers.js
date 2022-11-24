@@ -79,11 +79,14 @@ async function getJiraInfo(jiraID) {
  */
  async function getGitHubInfo(github, issueID, context) {
     // TODO
-    return github.rest.issues.get({
+    const issue = await github.issues.get({
         issue_number: issueID,
         owner: context.repo.owner,
         repo: context.repo.repo,
       })
+    if (response.status == 200) {
+        return issue.data
+    }
 }
 
 /**
