@@ -79,32 +79,30 @@ async function commentNotStartedTicket(github, context, pullRequestNumber) {
 }
 
 async function verifyGitHubIssue(github, context, pullRequestNumber, issueID) {
-    const issueInfo = await helpers.getGitHubInfo(github, context, issueID);
-    // TODO: Remove console.log
-    console.log(issueInfo)
-    if (!issueInfo) {
+    const issueInfo = await helpers.getGitHubInfo(github, context, issueID, pullRequestNumber);
+    if (issueInfo) {
+        if (!issueInfo.assignees.length) {
+            await github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pullRequestNumber,
+                body: ":warning: GitHub issue #" + issueID + " **has not been assigned in GitHub**, please assign the ticket."
+            })
+        }
+        if(!issueInfo.labels.length) {
+            await github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pullRequestNumber,
+                body: ":warning: GitHub issue #" + issueID + " **has no labels in GitHub**, please add labels for components."
+            })
+        }
+    } else {
         await github.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: pullRequestNumber,
-            body: ":warning: GitHub issue #" + issueID + " could not be found."
-        })
-        return null
-    }
-    if (!issueInfo.assignees.length) {
-        await github.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: pullRequestNumber,
-            body: ":warning: GitHub issue #" + issueID + " **has not been assigned in GitHub**, please assign the ticket."
-        })
-    }
-    if(!issueInfo.labels.length) {
-        await github.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: pullRequestNumber,
-            body: ":warning: GitHub issue #" + issueID + " **has no labels in GitHub**, please add labels for components."
+            body: ":warning: GitHub issue #" + issueID + " could not be retrieved."
         })
     }
 }
