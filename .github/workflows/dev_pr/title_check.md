@@ -33,7 +33,7 @@ or
 
 In the case of old issues on JIRA the title also supports:
 
-    JIRA-${JIRA_ISSUE_ID}: [${COMPONENT}] ${SUMMARY}
+    ARROW-${JIRA_ISSUE_ID}: [${COMPONENT}] ${SUMMARY}
 
 See also:
 

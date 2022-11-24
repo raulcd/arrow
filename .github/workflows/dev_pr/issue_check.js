@@ -84,6 +84,7 @@ async function verifyGitHubIssue(github, context, pullRequestNumber, issueID) {
         owner: context.repo.owner,
         repo: context.repo.repo,
       })
+    console.log(issues)
     if (issues.length != 1) {
         await github.issues.createComment({
             owner: context.repo.owner,
