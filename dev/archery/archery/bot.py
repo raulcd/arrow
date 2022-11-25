@@ -91,6 +91,7 @@ class CommentBot:
         self.name = name
         self.handler = handler
         self.github = github.Github(token)
+        # TODO(raulcd): testing
 
     def parse_command(self, payload):
         mention = '@{}'.format(self.name)
