@@ -89,7 +89,7 @@ async function assignGitHubIssue(github, context, pullRequestNumber, issueInfo) 
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: pullRequestNumber,
-        body: ":warning: GitHub issue #" + issueID + " **has been automatically assigned in GitHub** to PR creator."
+        body: ":warning: GitHub issue #" + issueInfo.number + " **has been automatically assigned in GitHub** to PR creator."
     });
 }
 
