@@ -97,7 +97,7 @@ module.exports = async ({github, context}) => {
   const pullRequestNumber = context.payload.number;
   const title = context.payload.pull_request.title;
   const issue = helpers.detectIssue(title);
-  if (!issue){
+  if (issue){
     if (issue.kind == "jira") {
       await commentJIRAURL(github, context, pullRequestNumber, issue.id);
     } else if (issue.kind == "github") {
