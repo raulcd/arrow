@@ -17,7 +17,7 @@
 
 module.exports = async ({github, context}) => {
   console.log(context.payload)
-  const issueNumber = context.payload.number;
+  const issueNumber = context.payload.issue.number;
   await github.issues.addAssignees({
     owner: context.repo.owner,
     repo: context.repo.repo,
