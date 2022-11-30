@@ -91,7 +91,7 @@ async function commentGitHubURL(github, context, pullRequestNumber, issueID) {
       owner: context.repo.owner,
       repo: context.repo.repo,
       pull_number: pullRequestNumber,
-      body: context.payload.pull_request.body + "\n" + message;
+      body: context.payload.pull_request.body + "\n" + message
     });
     await github.issues.createComment({
       owner: context.repo.owner,
