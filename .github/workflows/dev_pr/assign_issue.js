@@ -16,6 +16,7 @@
 // under the License.
 
 module.exports = async ({github, context}) => {
+  console.log(context.payload)
   const issueNumber = context.payload.number;
   await github.issues.addAssignees({
     owner: context.repo.owner,
