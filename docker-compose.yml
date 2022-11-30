@@ -870,6 +870,26 @@ services:
     volumes: *ubuntu-volumes
     command: *python-command
 
+  ubuntu-python-dev:
+    # Usage:
+    #   docker-compose build ubuntu-cpp
+    #   docker-compose build ubuntu-python-dev
+    #   docker-compose run --rm ubuntu-python-dev
+    image: ${REPO}:amd64-ubuntu-22.04-python-dev
+    build:
+      context: .
+      dockerfile: ci/docker/linux-apt-python-dev.dockerfile
+      cache_from:
+        - ${REPO}:amd64-ubuntu-22.04-python-dev
+      args:
+        base: ${REPO}:amd64-ubuntu-22.04-cpp
+    shm_size: *shm-size
+    environment:
+      <<: *ccache
+      PYTHONPATH: /usr/local/lib/python3.10/dist-packages
+    volumes: *ubuntu-volumes
+    command: *python-command
+
   fedora-python:
     # Usage:
     #   docker-compose build fedora-cpp
