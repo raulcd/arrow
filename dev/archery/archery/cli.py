@@ -785,6 +785,7 @@ def trigger_bot(event_name, event_payload, arrow_token):
 
     class PullRequestWorkflowBot:
         def handle(self, event_name, event_payload):
+            print(f"Does this print")
             pass
 
     event_payload = json.loads(event_payload.read())
