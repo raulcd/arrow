@@ -141,6 +141,7 @@ class CMakeFormat(Command):
 def cmake_linter(src, fix=False):
     """
     Run cmake-format on all CMakeFiles.txt
+    Adding a comment here
     """
     logger.info("Running cmake-format linters")
 
