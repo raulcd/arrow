@@ -109,7 +109,8 @@ jobs:
           # make brew Java available to CMake
           if [ "{{ arch }}" = "aarch_64" ]; then
             export JAVA_HOME=$(brew --prefix openjdk@11)/libexec/openjdk.jdk/Contents/Home
-            export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
+            export LDFLAGS=-L$(brew --prefix curl)/lib
+            export CFLAGS=-I$(brew --prefix curl)/include
           fi
           arrow/ci/scripts/java_jni_macos_build.sh \
             $GITHUB_WORKSPACE/arrow \
