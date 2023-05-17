@@ -47,6 +47,55 @@ setup_dir = os.path.abspath(os.path.dirname(__file__))
 
 ext_suffix = sysconfig.get_config_var('EXT_SUFFIX')
 
+import argparse
+
+# Pre-parse and remove the '--target' argument from sys.argv
+parser = argparse.ArgumentParser()
+parser.add_argument('--target', default='pyarrow')
+values, rest = parser.parse_known_args()
+DIST_TARGET = values.target
+sys.argv = sys.argv[:1] + rest
+
+class Target():
+    def __init__(self, target):
+        if target not in ['pyarrow', 'pyarrow_core', 'pyarrow_flight']:
+            raise ValueError("unknown distribution target: '%s'" % target)
+        self.target = target
+
+    def get_packages(self):
+        if strtobool(os.environ.get('PYARROW_INSTALL_TESTS', '1')):
+            return ['pyarrow', 'pyarrow.tests']
+        else:
+            return ['pyarrow']
+
+    def get_package_data(self):
+        return {'pyarrow': ['*.pxd', '*.pyx', 'includes/*.pxd']}
+
+    def get_description(self):
+        if self.target == 'pyarrow':
+            return 'Python library for Apache Arrow'
+        elif self.target == 'pyarrow_core':
+            return 'Python library for core Apache Arrow features'
+        elif self.target == 'pyarrow_flight':
+            return 'Python library for core Apache Arrow features'
+
+    def get_long_description(self):
+        # TODO
+        if self.target == 'pyarrow':
+            with open('README.md') as f:
+                long_description = f.read()
+        else:
+            with open(os.path.join(self.target, 'README.md')) as f:
+                long_description = f.read()
+        return long_description
+
+    def get_test_suite(self):
+        # TODO
+        return '%s.tests' % self.target
+
+
+target = Target(DIST_TARGET)
+
 
 @contextlib.contextmanager
 def changed_dir(dirname):
@@ -83,6 +132,7 @@ class build_ext(_build_ext):
 
         self.extensions = [ext for ext in self.extensions
                            if ext.name != '__dummy__']
+        breakpoint()
 
         for ext in self.extensions:
             if (hasattr(ext, 'include_dirs') and
@@ -472,10 +522,10 @@ else:
 
 
 setup(
-    name='pyarrow',
-    packages=packages,
+    name=target.target,
+    packages=target.get_packages(),
     zip_safe=False,
-    package_data={'pyarrow': ['*.pxd', '*.pyx', 'includes/*.pxd']},
+    package_data=target.get_package_data(),
     include_package_data=True,
     exclude_package_data=exclude_package_data,
     distclass=BinaryDistribution,

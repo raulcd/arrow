@@ -160,8 +160,8 @@ export ARROW_HOME=/tmp/arrow-dist
 export CMAKE_PREFIX_PATH=/tmp/arrow-dist
 
 pushd /arrow/python
-python setup.py bdist_wheel
-
+python setup.py bdist_wheel --target pyarrow_core
+# --exclude libarrow_flight.so --exclude libarrow_python_flight.so
 echo "=== (${PYTHON_VERSION}) Tag the wheel with manylinux${MANYLINUX_VERSION} ==="
-auditwheel repair -L . dist/pyarrow-*.whl -w repaired_wheels
+#auditwheel repair -L . dist/pyarrow*.whl -w repaired_wheels
 popd
