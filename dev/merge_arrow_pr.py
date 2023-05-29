@@ -248,6 +248,7 @@ class GitHubIssue(object):
         return unreleased_versions
 
     def resolve(self, fix_version, comment, pr_body):
+        # comment
         cur_status = self.issue["state"]
 
         if cur_status == "closed":
