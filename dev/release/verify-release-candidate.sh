@@ -602,6 +602,10 @@ test_and_install_cpp() {
     ARROW_CMAKE_OPTIONS="${ARROW_CMAKE_OPTIONS:-} -G ${CMAKE_GENERATOR}"
   fi
 
+  if [ "$(uname)" == "Darwin" ]; then
+    brew uninstall --force protobuf abseil grpc
+  fi
+
   cmake \
     -DARROW_BOOST_USE_SHARED=ON \
     -DARROW_BUILD_EXAMPLES=OFF \
@@ -638,6 +642,7 @@ test_and_install_cpp() {
     -DCMAKE_INSTALL_PREFIX=$ARROW_HOME \
     -DCMAKE_UNITY_BUILD=${CMAKE_UNITY_BUILD:-OFF} \
     -DGTest_SOURCE=BUNDLED \
+    -DProtobuf_SOURCE=BUNDLED \
     -DPARQUET_BUILD_EXAMPLES=ON \
     -DPARQUET_BUILD_EXECUTABLES=ON \
     -DPARQUET_REQUIRE_ENCRYPTION=ON \
