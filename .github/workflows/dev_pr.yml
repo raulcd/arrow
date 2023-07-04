@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: apache/arrow
+          repository: raulcd/arrow
           ref: main
           persist-credentials: false
 
