@@ -62,6 +62,7 @@ ORG_NAME = (
     os.environ.get("PR_REMOTE_NAME") or  # backward compatibility
     "apache"
 )
+# test
 PROJECT_NAME = os.environ.get('ARROW_PROJECT_NAME') or "arrow"
 
 # For testing to avoid accidentally pushing to apache
