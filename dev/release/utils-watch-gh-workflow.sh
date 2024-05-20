@@ -27,7 +27,7 @@ fi
 
 TAG=$1
 WORKFLOW=$2
-REPOSITORY="apache/arrow"
+REPOSITORY="mathworks/arrow"
 
 echo "Looking for GitHub Actions workflow on ${REPOSITORY}:${TAG}"
 RUN_ID=""

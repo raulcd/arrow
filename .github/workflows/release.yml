@@ -21,8 +21,8 @@ on:
   push:
     tags:
       # Trigger workflow when a tag whose name matches the pattern
-      # pattern "apache-arrow-{MAJOR}.{MINOR}.{PATCH}" is pushed.
-      - "apache-arrow-[0-9]+.[0-9]+.[0-9]+"
+      # pattern "test-apache-arrow-{MAJOR}.{MINOR}.{PATCH}" is pushed.
+      - "test-apache-arrow-[0-9]+.[0-9]+.[0-9]+"
 
 permissions:
   contents: write
@@ -38,7 +38,7 @@ jobs:
     steps:
       - name: Get Tag Name of Latest Release Candidate
         run: |
-          rc_tag=$(gh release list --repo apache/arrow | \
+          rc_tag=$(gh release list --repo mathworks/arrow | \
                     cut -f3 | \
                     grep -F "${GITHUB_REF_NAME}-rc" | \
                     head -n1)
@@ -46,7 +46,7 @@ jobs:
           echo "RELEASE_CANDIDATE_TAG_NAME=${rc_tag}" >> ${GITHUB_ENV}
       - name: Store Version and Release Candidate Number
         run: |
-          version_with_rc=${RELEASE_CANDIDATE_TAG_NAME#apache-arrow-}
+          version_with_rc=${RELEASE_CANDIDATE_TAG_NAME#test-apache-arrow-}
           version=${version_with_rc%-rc*}
           rc_num=${version_with_rc#${version}-rc}
           echo "VERSION_WITH_RC=${version_with_rc}" >> ${GITHUB_ENV}
@@ -55,7 +55,7 @@ jobs:
       - name: Download Release Candidate Artifacts 
         run: |
           mkdir release_candidate_artifacts
-          gh release download ${RELEASE_CANDIDATE_TAG_NAME} --repo apache/arrow --dir release_candidate_artifacts
+          gh release download ${RELEASE_CANDIDATE_TAG_NAME} --repo mathworks/arrow --dir release_candidate_artifacts
       - name: Create Release Title
         run: |
           title="Apache Arrow ${VERSION}"
@@ -67,7 +67,7 @@ jobs:
       - name: Create GitHub Release
         run: |
           gh release create ${GITHUB_REF_NAME} \
-            --repo apache/arrow \
+            --repo mathworks/arrow \
             --verify-tag \
             --title "${RELEASE_TITLE}" \
             --notes "TODO" \

@@ -27,8 +27,8 @@ fi
 
 
 VERSION=$1
-REPOSITORY="apache/arrow"
-TAG="apache-arrow-${VERSION}"
+REPOSITORY="mathworks/arrow"
+TAG="test-apache-arrow-${VERSION}"
 WORKFLOW="release.yml"
 SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
