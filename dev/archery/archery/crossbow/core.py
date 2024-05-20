@@ -427,6 +427,7 @@ class Repo:
         return branch
 
     def create_tag(self, tag_name, commit_id, message=''):
+        # Trigger a PR
         git_object_commit = (
             pygit2.GIT_OBJECT_COMMIT
             if getattr(pygit2, 'GIT_OBJECT_COMMIT')
