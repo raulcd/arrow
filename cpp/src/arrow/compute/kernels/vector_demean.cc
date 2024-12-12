@@ -17,6 +17,8 @@
 // under the License.
 
 // Include necessary Arrow headers
+#include <arrow/compute/api_vector.h>
+#include "arrow/compute/api_scalar.h"
 #include "arrow/compute/function.h"
 #include "arrow/compute/registry.h"
 #include "arrow/util/logging.h"
@@ -57,12 +59,16 @@ class DemeanMetaFunction : public MetaFunction {
  private:
   template <typename T>
   static Result<Datum> Demean(const T& input, ExecContext* ctx) {
-    arrow::Datum demean_datum;
-    Datum mean_datum;
-    ARROW_ASSIGN_OR_RAISE(mean_datum, arrow::compute::CallFunction("mean", {input}));
-    ARROW_ASSIGN_OR_RAISE(demean_datum,
-                          arrow::compute::CallFunction("subtract", {input, mean_datum}));
-    return demean_datum;
+    // TODO: Expose options?
+    Datum mean_result;
+    ARROW_ASSIGN_OR_RAISE(
+        mean_result, arrow::compute::CumulativeMean(input, CumulativeOptions(), ctx));
+    Datum demean_result;
+    ARROW_ASSIGN_OR_RAISE(
+        demean_result,
+        arrow::compute::Subtract(input, mean_result, ArithmeticOptions(), ctx));
+
+    return demean_result;
   }
 };
 }  // namespace
