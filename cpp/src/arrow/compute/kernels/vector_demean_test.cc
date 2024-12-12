@@ -32,7 +32,7 @@ namespace compute {
 TEST(TestDemean, BasicDemean) {
   constexpr int data_bufndx{1};
   const std::vector<int32_t> test_result{0, 0, 0, 0, 0, 0};
-  std::vector<int32_t> test_values{1, 1, 1, 1, 1, 1};
+  const std::vector<int32_t> test_values{1, 1, 1, 1, 1, 1};
   Int32Builder input_builder;
   ASSERT_OK(input_builder.Reserve(test_values.size()));
   ASSERT_OK(input_builder.AppendValues(test_values));
@@ -44,7 +44,7 @@ TEST(TestDemean, BasicDemean) {
   // validate each value
   for (int val_ndx = 0; val_ndx < test_inputs->length(); ++val_ndx) {
     int32_t expected_value = test_result[val_ndx];
-    int32_t actual_value = result_data.GetValues<uint64_t>(data_bufndx)[val_ndx];
+    int32_t actual_value = result_data.GetValues<int32_t>(data_bufndx)[val_ndx];
     ASSERT_EQ(expected_value, actual_value);
   }
 }
