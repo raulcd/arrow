@@ -313,6 +313,7 @@ static std::unique_ptr<FunctionRegistry> CreateBuiltInRegistry() {
   // Vector functions
   RegisterVectorArraySort(registry.get());
   RegisterVectorCumulativeSum(registry.get());
+  RegisterVectorDemean(registry.get());
   RegisterVectorNested(registry.get());
   RegisterVectorRank(registry.get());
   RegisterVectorReplace(registry.get());
