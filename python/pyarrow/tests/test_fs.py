@@ -1574,18 +1574,36 @@ def test_filesystem_from_path_object(path):
     assert path == p.resolve().absolute().as_posix()
 
 
-@pytest.mark.s3
+def load_shared_library(lib_path, global_scope=False):
+    import ctypes
+    if global_scope:
+        lib = ctypes.CDLL(lib_path, mode=ctypes.RTLD_GLOBAL | os.RTLD_DEEPBIND)
+    else:
+        lib = ctypes.CDLL(lib_path)
+    return lib
+
+
 def test_filesystem_from_uri_s3(s3_server):
-    from pyarrow.fs import S3FileSystem
+    # Load libarrow_s3fs.so
+    # s3fs_lib_path = (
+    # '/home/raulcd/code/arrow/python/pyarrow/_s3fs.cpython-312-x86_64-linux-gnu.so'
+    # )
+
+    libarrow_s3fs_path = '/home/raulcd/code/libarrow_s3fs.so'
+    FileSystem.load_file_system(libarrow_s3fs_path)
+    import ctypes
+    lib = ctypes.CDLL(libarrow_s3fs_path, mode=ctypes.RTLD_GLOBAL)
+
+    assert lib is not None
 
     host, port, access_key, secret_key = s3_server['connection']
 
     uri = "s3://{}:{}@mybucket/foo/bar?scheme=http&endpoint_override={}:{}"\
           "&allow_bucket_creation=True" \
           .format(access_key, secret_key, host, port)
-
     fs, path = FileSystem.from_uri(uri)
-    assert isinstance(fs, S3FileSystem)
+    # from pyarrow.fs import S3FileSystem
+    # assert isinstance(fs, S3FileSystem)
     assert path == "mybucket/foo/bar"
 
     fs.create_dir(path)

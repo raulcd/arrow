@@ -475,6 +475,16 @@ cdef class FileSystem(_Weakrefable):
         with nogil:
             result = CFileSystemFromUriOrPath(c_uri, &c_path)
         return FileSystem.wrap(GetResultValue(result)), frombytes(c_path)
+    
+    def load_file_system(str lib_path):
+        cdef:
+           const char* c_path
+           bytes encoded_path
+
+        encoded_path = lib_path.encode('utf-8')
+        c_path = encoded_path
+        with nogil:
+            check_status(CLoadFileSystemFactories(c_path))
 
     cdef init(self, const shared_ptr[CFileSystem]& wrapped):
         self.wrapped = wrapped
