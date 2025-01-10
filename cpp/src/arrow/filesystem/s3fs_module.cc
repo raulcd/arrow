@@ -16,3 +16,4 @@
 // under the License.
 
 #include "arrow/filesystem/filesystem_library.h"
+#include "arrow/filesystem/s3fs.h"

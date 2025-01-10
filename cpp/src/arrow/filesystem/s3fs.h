@@ -254,7 +254,7 @@ struct ARROW_EXPORT S3Options {
   ///
   /// This is recommended if you use the standard AWS environment variables
   /// and/or configuration file.
-  static S3Options Defaults();
+  ARROW_EXPORT static S3Options Defaults();
 
   /// \brief Initialize with anonymous credentials.
   ///
