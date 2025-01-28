@@ -32,6 +32,7 @@ RUN \
   apt update ${quiet} && \
   apt install -y -V ${quiet} \
     build-essential \
+    curl \
     clang \
     cmake \
     debhelper \
