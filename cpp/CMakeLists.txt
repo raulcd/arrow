@@ -18,6 +18,11 @@
 cmake_minimum_required(VERSION 3.21)
 message(STATUS "Building using CMake version: ${CMAKE_VERSION}")
 
+# https://cmake.org/cmake/help/latest/policy/CMP0125.html
+#
+# find_(path|file|library|program) have consistent behavior for cache variables.
+cmake_policy(SET CMP0125 OLD)
+
 # https://www.cmake.org/cmake/help/latest/policy/CMP0025.html
 #
 # Compiler id for Apple Clang is now AppleClang.
