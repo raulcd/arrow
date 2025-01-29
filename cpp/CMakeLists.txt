@@ -18,10 +18,10 @@
 cmake_minimum_required(VERSION 3.21)
 message(STATUS "Building using CMake version: ${CMAKE_VERSION}")
 
-# https://cmake.org/cmake/help/latest/policy/CMP0125.html
+# https://cmake.org/cmake/help/latest/policy/CMP0126.html
 #
-# find_(path|file|library|program) have consistent behavior for cache variables.
-cmake_policy(SET CMP0125 OLD)
+# set(CACHE) does not remove a normal variable of the same name.
+cmake_policy(SET CMP0126 OLD)
 
 # https://www.cmake.org/cmake/help/latest/policy/CMP0025.html
 #
