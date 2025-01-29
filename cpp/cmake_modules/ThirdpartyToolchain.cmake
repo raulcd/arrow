@@ -5092,7 +5092,6 @@ macro(build_awssdk)
   endif()
   list(APPEND AWSSDK_PATCH_COMMAND ${AWSSDK_UNUSED_DIRECTORIES})
 
-  # WIP GH-44950
   # Patch parts of the AWSSDK EP so it builds cleanly under Rtools40
   if(WIN32 AND NOT MSVC)
     find_program(PATCH patch REQUIRED)
