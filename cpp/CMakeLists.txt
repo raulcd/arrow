@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.21)
 message(STATUS "Building using CMake version: ${CMAKE_VERSION}")
 
 # https://www.cmake.org/cmake/help/latest/policy/CMP0025.html
