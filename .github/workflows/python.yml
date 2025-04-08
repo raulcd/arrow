@@ -245,7 +245,7 @@ jobs:
       ARROW_GCS: "ON"
       ARROW_ORC: "ON"
       ARROW_S3: "ON"
-      CMAKE_GENERATOR: Ninja
+      GENERATOR: Ninja
     steps:
       - name: Checkout Arrow
         uses: actions/checkout@v4
@@ -281,13 +281,9 @@ jobs:
         env:
           # We can invalidate the current cache by updating this.
           CACHE_VERSION: "2022-09-13"
-      - name: Build
+      - name: Build and Test
         shell: cmd
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
-          bash -c "python -m pip install wheel"
-          bash -c "ci/scripts/cpp_build.sh $(pwd) $(pwd)/build"
-          bash -c "ci/scripts/python_build.sh $(pwd) $(pwd)/build"
-      - name: Test
-        shell: bash
-        run: ci/scripts/python_test.sh $(pwd) $(pwd)/build
+          call ci\appveyor-cpp-setup.bat
+          call ci\appveyor-cpp-build.bat
