@@ -21,7 +21,7 @@
 @rem The miniconda install on AppVeyor is very outdated, use Mambaforge instead
 @rem
 
-appveyor DownloadFile https://github.com/conda-forge/miniforge/releases/download/24.9.2-0/Mambaforge-Windows-x86_64.exe || exit /B
+Invoke-WebRequest -Uri https://github.com/conda-forge/miniforge/releases/download/24.9.2-0/Mambaforge-Windows-x86_64.exe -OutFile Mambaforge-Windows-x86_64.exe || exit /B
 start /wait "" Mambaforge-Windows-x86_64.exe /InstallationType=JustMe /RegisterPython=0 /S /D=C:\Mambaforge
 set "PATH=C:\Mambaforge\scripts;C:\Mambaforge\condabin;%PATH%"
 
