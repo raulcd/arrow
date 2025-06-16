@@ -394,6 +394,40 @@ Result<std::shared_ptr<Buffer>> BitmapOp(MemoryPool* pool, const uint8_t* left,
 
 }  // namespace
 
+Result<std::shared_ptr<Buffer>> OptionalBitmapAnd(MemoryPool* pool,
+                                                  const std::shared_ptr<Buffer>& left,
+                                                  int64_t left_offset,
+                                                  const std::shared_ptr<Buffer>& right,
+                                                  int64_t right_offset, int64_t length,
+                                                  int64_t out_offset) {
+  if (left == nullptr && right == nullptr) {
+    return nullptr;
+  } else if (left == nullptr) {
+    return CopyBitmap(pool, right->data(), right_offset, length, out_offset);
+  } else if (right == nullptr) {
+    return CopyBitmap(pool, left->data(), left_offset, length, out_offset);
+  } else {
+    return BitmapOp<std::bit_and>(pool, left->mutable_data(), left_offset,
+                                  right->mutable_data(), right_offset, length,
+                                  out_offset);
+  }
+}
+
+void OptionalBitmapAnd(const std::shared_ptr<Buffer>& left, int64_t left_offset,
+                       const std::shared_ptr<Buffer>& right, int64_t right_offset,
+                       int64_t length, int64_t out_offset, std::shared_ptr<Buffer>& out) {
+  if (left == nullptr && right == nullptr) {
+    return;
+  } else if (left == nullptr) {
+    CopyBitmap(right->data(), right_offset, length, out->mutable_data(), out_offset);
+  } else if (right == nullptr) {
+    CopyBitmap(left->data(), left_offset, length, out->mutable_data(), out_offset);
+  } else {
+    BitmapOp<std::bit_and>(left->data(), left_offset, right->data(), right_offset, length,
+                           out_offset, out->mutable_data());
+  }
+}
+
 Result<std::shared_ptr<Buffer>> BitmapAnd(MemoryPool* pool, const uint8_t* left,
                                           int64_t left_offset, const uint8_t* right,
                                           int64_t right_offset, int64_t length,
