@@ -1352,6 +1352,7 @@ services:
       - type: bind
         source: .
         target: "C:/arrow"
+    command: cmd /S /C "echo Base image for Python wheels on Windows"
 
   python-wheel-windows-vs2022:
     image: ${REPO}:python-${PYTHON}-wheel-windows-vs2022-vcpkg-${VCPKG}-${PYTHON_WHEEL_WINDOWS_IMAGE_REVISION}
