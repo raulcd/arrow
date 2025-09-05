@@ -69,6 +69,5 @@ RUN `
   --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
   --add Microsoft.VisualStudio.Component.Windows11SDK.26100 `
   --add Microsoft.VisualStudio.Component.VC.CMake.Project `
-  --add Microsoft.VisualStudio.Component.Vcpkg `
   || IF "%ERRORLEVEL%"=="3010" EXIT 0) `
   && del /q vs_buildtools.exe
