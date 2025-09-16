@@ -98,9 +98,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "${{ toJson(github.event) }}"
+          pr_branch=$(gh pr view ${{ github.event.issue.number }} \
+                  --jq '.headRefName' \
+                  --json headRefName \
+                  --repo ${GITHUB_REPOSITORY})
+          echo "pr_branch=${pr_branch}"
           gh workflow run ${{ steps.parse_comment.outputs.workflow }}.yml \
-                  --ref my-branch \
+                  --ref ${pr_branch} \
                   -f regex=${{ steps.parse_comment.outputs.regex }}
 
   issue_assign:
