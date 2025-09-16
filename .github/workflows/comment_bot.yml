@@ -78,7 +78,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            let body = github.event.comment.body.trim();
+            let body = context.payload.comment.body.trim();
             // Match format: @github-actions ci -w workflow_name regex
             const match = body.match(/^@github-actions ci\s+-w\s+(\S+)\s+(.+)$/);
             if (!match) {
