@@ -96,7 +96,7 @@ jobs:
       - name: Run workflow
         id: run_workflow
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pr_branch=$(gh pr view ${{ github.event.issue.number }} \
                   --jq '.headRefName' \
