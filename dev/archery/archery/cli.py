@@ -823,6 +823,7 @@ def integration(with_all=False, random_seed=12345, **args):
 @click.option('--event-payload', '-p', type=click.File('r', encoding='utf8'),
               default='-', required=True)
 def trigger_bot(arrow_token, committers_file, event_name, event_payload):
+    print("Test")
     from .bot import CommentBot, PullRequestWorkflowBot, actions
     from ruamel.yaml import YAML
 
