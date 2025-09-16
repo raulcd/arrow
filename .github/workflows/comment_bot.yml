@@ -93,6 +93,15 @@ jobs:
         run: |
           echo ${{ steps.parse_comment.outputs.workflow }}
           echo ${{ steps.parse_comment.outputs.regex }}
+      - name: Run workflow
+        id: run_workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "${{ toJson(github.event) }}"
+          gh workflow run ${{ steps.parse_comment.outputs.workflow }}.yml \
+                  --ref my-branch \
+                  -f regex=${{ steps.parse_comment.outputs.regex }}
 
   issue_assign:
     name: "Assign issue"
