@@ -103,6 +103,7 @@ jobs:
                   --json headRefName \
                   --repo ${GITHUB_REPOSITORY})
           echo "pr_branch=${pr_branch}"
+          cd arrow
           gh workflow run ${{ steps.parse_comment.outputs.workflow }}.yml \
                   --ref ${pr_branch} \
                   -f regex=${{ steps.parse_comment.outputs.regex }}
