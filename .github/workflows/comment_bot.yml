@@ -56,6 +56,58 @@ jobs:
             --event-name ${{ github.event_name }} \
             --event-payload ${{ github.event_path }}
 
+  ci:
+    name: Listen CI!
+    if: startsWith(github.event.comment.body, '@github-actions ci') && ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Checkout Arrow
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          path: arrow
+          # fetch the tags for version number generation
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: 3.12
+      - name: Parse comment
+        id: parse_comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let body = context.payload.comment.body.trim();
+            // Match format: @github-actions ci -w workflow_name regex
+            const match = body.match(/^@github-actions ci\s+-w\s+(\S+)\s+(.+)$/);
+            if (!match) {
+              core.setFailed('Comment format invalid. Expected: @github-actions ci -w workflow_name regex');
+            } else {
+              const workflow = match[1];
+              const regex = match[2];
+              core.setOutput('workflow', workflow);
+              core.setOutput('regex', regex);
+            }
+      - name: Handle GitHub comment event
+        run: |
+          echo ${{ steps.parse_comment.outputs.workflow }}
+          echo ${{ steps.parse_comment.outputs.regex }}
+      - name: Run workflow
+        id: run_workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr_branch=$(gh pr view ${{ github.event.issue.number }} \
+                  --jq '.headRefName' \
+                  --json headRefName \
+                  --repo ${GITHUB_REPOSITORY})
+          echo "pr_branch=${pr_branch}"
+          cd arrow
+          gh workflow run ${{ steps.parse_comment.outputs.workflow }}.yml \
+                  --ref ${pr_branch} \
+                  -f regex=${{ steps.parse_comment.outputs.regex }}
+
   issue_assign:
     name: "Assign issue"
     permissions:
