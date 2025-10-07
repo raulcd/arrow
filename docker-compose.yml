@@ -1169,7 +1169,7 @@ services:
       args:
         arch: ${ARCH}
         arch_short: ${ARCH_SHORT}
-        base: quay.io/pypa/musllinux_1_2_${ARCH_ALIAS}:2025-06-17-3a3fb50
+        base: quay.io/pypa/musllinux_1_2_${ARCH_ALIAS}:2025-05-16-b59c0c7
         musllinux: 1_2
         python: ${PYTHON}
         python_abi_tag: ${PYTHON_ABI_TAG}
