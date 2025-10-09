@@ -24,13 +24,19 @@ Write-Host "::endgroup::"
 Write-Host "::group::Removing Windows applications"
 try {
     # Remove browsers
+    Write-Host "Removing Firefox..."
     Get-Package "*Firefox*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Removing Chrome..."
     Get-Package "*Chrome*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Removing Edge..."
     Get-Package "*Edge*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
     
     # Remove other large applications
-    Get-Package "*Docker*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Removing SQL Server..."
     Get-Package "*SQL Server*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Removing Android SDK..."
+    Get-Package "*Android SDK*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Removing Visual Studio Installer..."
     Get-Package "*Visual Studio Installer*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
 } catch {
     Write-Host "Error removing packages: $_"
