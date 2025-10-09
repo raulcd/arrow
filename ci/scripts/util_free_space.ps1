@@ -118,6 +118,18 @@ if (Test-Path "C:\Program Files (x86)\Windows Kits\10\bin") {
 Write-Host "::endgroup::"
 
 Write-Host "::group::Chocolatey packages"
+& choco uninstall "R.Project" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "julia" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "imagemagick" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "php" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "apache-httpd" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "nginx" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "maven" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "Minikube" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "pulumi" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "packer" -y -x --remove-dependencies 2>$null | Out-Null
+& choco uninstall "kubernetes-helm" -y -x --remove-dependencies 2>$null | Out-Null
+
 try {
     if (Get-Command choco -ErrorAction SilentlyContinue) {
         Write-Host "Chocolatey packages installed:"
