@@ -26,18 +26,29 @@ try {
     # Remove browsers
     Write-Host "Removing Firefox..."
     Get-Package "*Firefox*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Disk space after removing Firefox"
+    Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name="Size(GB)";Expression={[math]::Round($_.Size/1GB,2)}}, @{Name="FreeSpace(GB)";Expression={[math]::Round($_.FreeSpace/1GB,2)}}
     Write-Host "Removing Chrome..."
     Get-Package "*Chrome*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Disk space after removing Chrome"
+    Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name="Size(GB)";Expression={[math]::Round($_.Size/1GB,2)}}, @{Name="FreeSpace(GB)";Expression={[math]::Round($_.FreeSpace/1GB,2)}}
     Write-Host "Removing Edge..."
     Get-Package "*Edge*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
-    
+    Write-Host "Disk space after removing Edge"
+    Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name="Size(GB)";Expression={[math]::Round($_.Size/1GB,2)}}, @{Name="FreeSpace(GB)";Expression={[math]::Round($_.FreeSpace/1GB,2)}}
     # Remove other large applications
     Write-Host "Removing SQL Server..."
     Get-Package "*SQL Server*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Disk space after removing SQL Server"
+    Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name="Size(GB)";Expression={[math]::Round($_.Size/1GB,2)}}, @{Name="FreeSpace(GB)";Expression={[math]::Round($_.FreeSpace/1GB,2)}}
     Write-Host "Removing Android SDK..."
     Get-Package "*Android SDK*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Disk space after removing Android SDK"
+    Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name="Size(GB)";Expression={[math]::Round($_.Size/1GB,2)}}, @{Name="FreeSpace(GB)";Expression={[math]::Round($_.FreeSpace/1GB,2)}}
     Write-Host "Removing Visual Studio Installer..."
     Get-Package "*Visual Studio Installer*" -ErrorAction SilentlyContinue | Uninstall-Package -Force -ErrorAction SilentlyContinue
+    Write-Host "Disk space after removing Visual Studio Installer"
+    Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID, @{Name="Size(GB)";Expression={[math]::Round($_.Size/1GB,2)}}, @{Name="FreeSpace(GB)";Expression={[math]::Round($_.FreeSpace/1GB,2)}}
 } catch {
     Write-Host "Error removing packages: $_"
 }
@@ -104,19 +115,31 @@ if (Test-Path "C:\Program Files (x86)\Windows Kits\10\bin") {
     Write-Host "Removing old Windows SDK versions..."
     Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" | Where-Object { $_.Name -lt "10.0.19041.0" } | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 }
+Write-Host "::endgroup::"
 
-# MSBuild cache and temp files
-if (Test-Path "C:\Users\runneradmin\AppData\Local\Microsoft\MSBuild") {
-    Write-Host "Removing MSBuild cache..."
-    Remove-Item -Path "C:\Users\runneradmin\AppData\Local\Microsoft\MSBuild" -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "::group::Chocolatey packages"
+try {
+    if (Get-Command choco -ErrorAction SilentlyContinue) {
+        Write-Host "Chocolatey packages installed:"
+        $chocoPackages = & choco list --local-only --limit-output
+        $chocoPackages | ForEach-Object {
+            $parts = $_ -split '\|'
+            if ($parts.Length -ge 2) {
+                Write-Host "  $($parts[0]) v$($parts[1])"
+            }
+        }
+        Write-Host "Total Chocolatey packages: $($chocoPackages)"
+        Write-Host "Total Chocolatey packages: $($chocoPackages.Count)"
+
+        # Check size of Chocolatey directory
+        $chocoSize = Get-DirectorySize "C:\ProgramData\chocolatey"
+        Write-Host "Chocolatey directory size: $chocoSize"
+    } else {
+        Write-Host "Chocolatey not installed"
+    }
+} catch {
+    Write-Host "Error checking Chocolatey: $_"
 }
-
-# NuGet packages cache (~1GB)
-if (Test-Path "C:\Users\runneradmin\.nuget\packages") {
-    Write-Host "Removing NuGet packages cache..."
-    Remove-Item -Path "C:\Users\runneradmin\.nuget\packages" -Recurse -Force -ErrorAction SilentlyContinue
-}
-
 Write-Host "::endgroup::"
 
 # Clean Windows temporary files
