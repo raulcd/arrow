@@ -44,6 +44,11 @@ jobs:
       {{ macros.github_login_ghcr()|indent }}
       {{ macros.github_install_archery()|indent }}
 
+      - name: Free up disk space
+        shell: powershell
+        run: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+          .\arrow\ci\scripts\util_free_space.ps1
       - name: Prepare
         shell: bash
         run: |
