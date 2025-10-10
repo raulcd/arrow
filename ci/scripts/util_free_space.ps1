@@ -157,6 +157,7 @@ Write-Host "::endgroup::"
 # Clean Windows temporary files
 Write-Host "::group::Cleaning Windows temporary files"
 Remove-Item -Path "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "C:\Windows\SystemTemp\*" -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path "C:\Users\runneradmin\AppData\Local\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
 Write-Host "::endgroup::"
 
