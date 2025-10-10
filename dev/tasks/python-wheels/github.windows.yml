@@ -40,6 +40,7 @@ jobs:
       DOCKER_BUILDKIT: 0
 
     steps:
+      - run: Get-PSDrive
       {{ macros.github_checkout_arrow()|indent }}
       - name: Free up disk space
         shell: powershell
@@ -48,6 +49,7 @@ jobs:
           .\arrow\ci\scripts\util_free_space.ps1
       {{ macros.github_login_ghcr()|indent }}
       {{ macros.github_install_archery()|indent }}
+      - run: Get-PSDrive
 
       - name: Prepare
         shell: bash
@@ -65,6 +67,8 @@ jobs:
       - name: Build wheel
         shell: cmd
         run: |
+          @rem Check where are we
+          pwd
           cd arrow
           @rem We want to use only
           @rem   archery docker run -e SETUPTOOLS_SCM_PRETEND_VERSION={{ arrow.no_rc_version }} python-wheel-windows-vs2022
