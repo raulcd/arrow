@@ -43,6 +43,7 @@ RUN \
     cmake \
     debhelper \
     devscripts \
+    diffoscope \
     faketime \
     gi-docgen \
     git \

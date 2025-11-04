@@ -111,7 +111,7 @@ fi
 export DEB_BUILD_OPTIONS
 df -h
 if [ "${REPROTEST:-no}" = "yes" ]; then
-  run reprotest --verbosity 2 --vary=-kernel,-fileordering,-domain_host,-build_path -s .. ./reprotest.sh **.deb
+  run reprotest --verbosity 2 --vary=-kernel,-fileordering,-domain_host -s .. ./reprotest.sh **.deb
 fi
 if [ "${DEBUG:-no}" = "yes" ]; then
   run debuild "${debuild_options[@]}" "${dpkg_buildpackage_options[@]}"
