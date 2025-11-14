@@ -1879,7 +1879,7 @@ endif()
 # Protocol Buffers (required for ORC, Flight and Substrait libraries)
 
 macro(build_protobuf)
-  message(STATUS "Building Protocol Buffers from source")
+  message(STATUS "Building Protocol Buffers from source using FetchContent")
   set(PROTOBUF_VENDORED TRUE)
   set(PROTOBUF_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/protobuf_ep-install")
   set(PROTOBUF_INCLUDE_DIR "${PROTOBUF_PREFIX}/include")
@@ -1888,72 +1888,113 @@ macro(build_protobuf)
   # so we need to reset the flag so that we can link against it correctly
   # later.
   set(Protobuf_USE_STATIC_LIBS ON)
-  # Newer protobuf releases always have a lib prefix independent from CMAKE_STATIC_LIBRARY_PREFIX
-  set(PROTOBUF_STATIC_LIB
-      "${PROTOBUF_PREFIX}/lib/libprotobuf${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  set(PROTOC_STATIC_LIB "${PROTOBUF_PREFIX}/lib/libprotoc${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  set(Protobuf_PROTOC_LIBRARY "${PROTOC_STATIC_LIB}")
-  set(PROTOBUF_COMPILER "${PROTOBUF_PREFIX}/bin/protoc")
 
   # Strip lto flags (which may be added by dh_auto_configure)
   # See https://github.com/protocolbuffers/protobuf/issues/7092
-  set(PROTOBUF_C_FLAGS ${EP_C_FLAGS})
-  set(PROTOBUF_CXX_FLAGS ${EP_CXX_FLAGS})
+  set(PROTOBUF_C_FLAGS ${CMAKE_C_FLAGS})
+  set(PROTOBUF_CXX_FLAGS ${CMAKE_CXX_FLAGS})
   string(REPLACE "-flto=auto" "" PROTOBUF_C_FLAGS "${PROTOBUF_C_FLAGS}")
   string(REPLACE "-ffat-lto-objects" "" PROTOBUF_C_FLAGS "${PROTOBUF_C_FLAGS}")
   string(REPLACE "-flto=auto" "" PROTOBUF_CXX_FLAGS "${PROTOBUF_CXX_FLAGS}")
   string(REPLACE "-ffat-lto-objects" "" PROTOBUF_CXX_FLAGS "${PROTOBUF_CXX_FLAGS}")
-  set(PROTOBUF_CMAKE_ARGS
-      ${EP_COMMON_CMAKE_ARGS}
-      "-DCMAKE_CXX_FLAGS=${PROTOBUF_CXX_FLAGS}"
-      "-DCMAKE_C_FLAGS=${PROTOBUF_C_FLAGS}"
-      "-DCMAKE_INSTALL_PREFIX=${PROTOBUF_PREFIX}"
-      -Dprotobuf_BUILD_TESTS=OFF
-      -Dprotobuf_DEBUG_POSTFIX=)
+
+  # Save original flags and apply LTO-stripped flags
+  set(CMAKE_C_FLAGS_SAVED "${CMAKE_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS_SAVED "${CMAKE_CXX_FLAGS}")
+  set(CMAKE_C_FLAGS "${PROTOBUF_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${PROTOBUF_CXX_FLAGS}")
+
+  # Configure Protobuf options before FetchContent
+  set(protobuf_BUILD_TESTS OFF)
   if(MSVC AND NOT ARROW_USE_STATIC_CRT)
-    list(APPEND PROTOBUF_CMAKE_ARGS "-Dprotobuf_MSVC_STATIC_RUNTIME=OFF")
+    set(protobuf_MSVC_STATIC_RUNTIME OFF)
   endif()
-  if(ZLIB_ROOT)
-    list(APPEND PROTOBUF_CMAKE_ARGS "-DZLIB_ROOT=${ZLIB_ROOT}")
-  endif()
-  set(PROTOBUF_EXTERNAL_PROJECT_ADD_ARGS CMAKE_ARGS ${PROTOBUF_CMAKE_ARGS} SOURCE_SUBDIR
-                                         "cmake")
 
-  externalproject_add(protobuf_ep
-                      ${EP_COMMON_OPTIONS} ${PROTOBUF_EXTERNAL_PROJECT_ADD_ARGS}
-                      BUILD_BYPRODUCTS "${PROTOBUF_STATIC_LIB}" "${PROTOBUF_COMPILER}"
-                      BUILD_IN_SOURCE 1
-                      URL ${PROTOBUF_SOURCE_URL}
-                      URL_HASH "SHA256=${ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM}")
+  fetchcontent_declare(protobuf
+                       URL ${PROTOBUF_SOURCE_URL}
+                       URL_HASH "SHA256=${ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM}"
+                       SOURCE_SUBDIR cmake)
 
-  file(MAKE_DIRECTORY "${PROTOBUF_INCLUDE_DIR}")
+  prepare_fetchcontent()
+
+  set(CMAKE_INSTALL_PREFIX_SAVED "${CMAKE_INSTALL_PREFIX}")
+  set(CMAKE_INSTALL_PREFIX "${PROTOBUF_PREFIX}")
+  fetchcontent_makeavailable(protobuf)
+
+  # Restore original install prefix and flags
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX_SAVED}")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_SAVED}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_SAVED}")
+  cleanup_fetchcontent()
+
+  # Get the actual include directory from the protobuf target
+  # For FetchContent, this points to the source directory which contains the .proto files
+  set(PROTOBUF_INCLUDE_DIR "${protobuf_SOURCE_DIR}/src")
   # For compatibility of CMake's FindProtobuf.cmake.
   set(Protobuf_INCLUDE_DIRS "${PROTOBUF_INCLUDE_DIR}")
+  # Set import dirs so protoc can find well-known types like timestamp.proto
+  set(Protobuf_IMPORT_DIRS "${PROTOBUF_INCLUDE_DIR}")
 
-  add_library(arrow::protobuf::libprotobuf STATIC IMPORTED)
-  set_target_properties(arrow::protobuf::libprotobuf PROPERTIES IMPORTED_LOCATION
-                                                                "${PROTOBUF_STATIC_LIB}")
-  target_include_directories(arrow::protobuf::libprotobuf BEFORE
-                             INTERFACE "${PROTOBUF_INCLUDE_DIR}")
-  add_library(arrow::protobuf::libprotoc STATIC IMPORTED)
-  set_target_properties(arrow::protobuf::libprotoc PROPERTIES IMPORTED_LOCATION
-                                                              "${PROTOC_STATIC_LIB}")
-  target_include_directories(arrow::protobuf::libprotoc BEFORE
-                             INTERFACE "${PROTOBUF_INCLUDE_DIR}")
-  add_executable(arrow::protobuf::protoc IMPORTED)
-  set_target_properties(arrow::protobuf::protoc PROPERTIES IMPORTED_LOCATION
-                                                           "${PROTOBUF_COMPILER}")
+  # For FetchContent builds, protoc and libprotoc are regular targets, not imported
+  # We can't get their locations at configure time, so we set placeholders
+  # The actual locations will be resolved at build time or by the install step
+  set(PROTOBUF_COMPILER "$<TARGET_FILE:protobuf::protoc>")
+  set(PROTOC_STATIC_LIB "$<TARGET_FILE:protobuf::libprotoc>")
+  set(Protobuf_PROTOC_LIBRARY "${PROTOC_STATIC_LIB}")
 
-  add_dependencies(arrow::protobuf::libprotobuf protobuf_ep)
-  add_dependencies(arrow::protobuf::protoc protobuf_ep)
+  # gRPC requires Protobuf to be installed to a known location.
+  # We have to do this in two steps to avoid double installation of Protobuf
+  # when Arrow is installed.
+  # This custom target ensures Protobuf is built before we install
+  # TODO: Investigate if libprotobuf-lite is actually needed by Arrow/gRPC
+  add_custom_target(protobuf_built
+                    DEPENDS protobuf::libprotobuf protobuf::libprotobuf-lite
+                            protobuf::libprotoc protobuf::protoc)
 
-  list(APPEND ARROW_BUNDLED_STATIC_LIBS arrow::protobuf::libprotobuf)
+  # Disable Protobuf's install script after it's built to prevent double installation
+  add_custom_command(OUTPUT "${protobuf_BINARY_DIR}/cmake_install.cmake.saved"
+                     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                             "${protobuf_BINARY_DIR}/cmake_install.cmake"
+                             "${protobuf_BINARY_DIR}/cmake_install.cmake.saved"
+                     COMMAND ${CMAKE_COMMAND} -E echo
+                             "# Protobuf install disabled to prevent double installation with Arrow"
+                             > "${protobuf_BINARY_DIR}/cmake_install.cmake"
+                     DEPENDS protobuf_built
+                     COMMENT "Disabling Protobuf install to prevent double installation"
+                     VERBATIM)
+
+  add_custom_target(protobuf_install_disabled ALL
+                    DEPENDS "${protobuf_BINARY_DIR}/cmake_install.cmake.saved")
+
+  # Install Protobuf to PROTOBUF_PREFIX for gRPC to find
+  add_custom_command(OUTPUT "${PROTOBUF_PREFIX}/.protobuf_installed"
+                     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                             "${protobuf_BINARY_DIR}/cmake_install.cmake.saved"
+                             "${protobuf_BINARY_DIR}/cmake_install.cmake.tmp"
+                     COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=${PROTOBUF_PREFIX}
+                             -DCMAKE_INSTALL_CONFIG_NAME=$<CONFIG> -P
+                             "${protobuf_BINARY_DIR}/cmake_install.cmake.tmp" ||
+                             ${CMAKE_COMMAND} -E true
+                     COMMAND ${CMAKE_COMMAND} -E touch
+                             "${PROTOBUF_PREFIX}/.protobuf_installed"
+                     DEPENDS protobuf_install_disabled
+                     COMMENT "Installing Protobuf to ${PROTOBUF_PREFIX} for gRPC"
+                     VERBATIM)
+
+  # Make protobuf_ep depend on the install completion marker
+  add_custom_target(protobuf_ep DEPENDS "${PROTOBUF_PREFIX}/.protobuf_installed")
+
+  # For FetchContent, we don't create arrow::protobuf::* aliases because
+  # protobuf::* are themselves aliases and CMake doesn't allow alias-to-alias.
+  # The code in resolve_dependency below will use protobuf::* targets directly.
+
+  list(APPEND ARROW_BUNDLED_STATIC_LIBS protobuf::libprotobuf)
 
   if(CMAKE_CROSSCOMPILING)
     # If we are cross compiling, we need to build protoc for the host
     # system also, as it is used when building Arrow
-    # We do this by calling CMake as a child process
-    # with CXXFLAGS / CFLAGS and CMake flags cleared.
+    # TODO: Migrate this to FetchContent as well for consistency
+    # For now, keep using ExternalProject_Add for host protoc
     set(PROTOBUF_HOST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/protobuf_ep_host-install")
     set(PROTOBUF_HOST_COMPILER "${PROTOBUF_HOST_PREFIX}/bin/protoc")
 
@@ -1967,6 +2008,7 @@ macro(build_protobuf)
     externalproject_add(protobuf_ep_host
                         ${EP_COMMON_OPTIONS}
                         CMAKE_ARGS ${PROTOBUF_HOST_CMAKE_ARGS}
+                        SOURCE_SUBDIR cmake
                         BUILD_BYPRODUCTS "${PROTOBUF_HOST_COMPILER}"
                         BUILD_IN_SOURCE 1
                         URL ${PROTOBUF_SOURCE_URL}
@@ -2139,8 +2181,13 @@ macro(build_substrait)
                                              SKIP_UNITY_BUILD_INCLUSION TRUE)
       list(APPEND SUBSTRAIT_PROTO_GEN_ALL "${SUBSTRAIT_PROTO_GEN}.${EXT}")
     endforeach()
+    # Add protobuf include directory for well-known types when using vendored protobuf
+    set(SUBSTRAIT_PROTOC_INCLUDES "-I${SUBSTRAIT_LOCAL_DIR}/proto")
+    if(PROTOBUF_VENDORED AND Protobuf_INCLUDE_DIRS)
+      list(APPEND SUBSTRAIT_PROTOC_INCLUDES "-I${Protobuf_INCLUDE_DIRS}")
+    endif()
     add_custom_command(OUTPUT "${SUBSTRAIT_PROTO_GEN}.cc" "${SUBSTRAIT_PROTO_GEN}.h"
-                       COMMAND ${ARROW_PROTOBUF_PROTOC} "-I${SUBSTRAIT_LOCAL_DIR}/proto"
+                       COMMAND ${ARROW_PROTOBUF_PROTOC} ${SUBSTRAIT_PROTOC_INCLUDES}
                                "--cpp_out=${SUBSTRAIT_CPP_DIR}"
                                "${SUBSTRAIT_LOCAL_DIR}/proto/substrait/${SUBSTRAIT_PROTO}.proto"
                        DEPENDS ${PROTO_DEPENDS} substrait_ep)
@@ -2158,10 +2205,15 @@ macro(build_substrait)
                                              SKIP_UNITY_BUILD_INCLUSION TRUE)
       list(APPEND SUBSTRAIT_PROTO_GEN_ALL "${ARROW_SUBSTRAIT_PROTO_GEN}.${EXT}")
     endforeach()
+    # Add protobuf include directory for well-known types when using vendored protobuf
+    set(ARROW_SUBSTRAIT_PROTOC_INCLUDES "-I${SUBSTRAIT_LOCAL_DIR}/proto"
+                                        "-I${ARROW_SUBSTRAIT_PROTOS_DIR}")
+    if(PROTOBUF_VENDORED AND Protobuf_INCLUDE_DIRS)
+      list(APPEND ARROW_SUBSTRAIT_PROTOC_INCLUDES "-I${Protobuf_INCLUDE_DIRS}")
+    endif()
     add_custom_command(OUTPUT "${ARROW_SUBSTRAIT_PROTO_GEN}.cc"
                               "${ARROW_SUBSTRAIT_PROTO_GEN}.h"
-                       COMMAND ${ARROW_PROTOBUF_PROTOC} "-I${SUBSTRAIT_LOCAL_DIR}/proto"
-                               "-I${ARROW_SUBSTRAIT_PROTOS_DIR}"
+                       COMMAND ${ARROW_PROTOBUF_PROTOC} ${ARROW_SUBSTRAIT_PROTOC_INCLUDES}
                                "--cpp_out=${SUBSTRAIT_CPP_DIR}"
                                "${ARROW_SUBSTRAIT_PROTOS_DIR}/substrait/${ARROW_SUBSTRAIT_PROTO}.proto"
                        DEPENDS ${PROTO_DEPENDS} substrait_ep)
@@ -3238,6 +3290,19 @@ macro(build_grpc)
   if(CARES_VENDORED)
     add_dependencies(grpc_dependencies cares_ep)
   endif()
+  if(PROTOBUF_VENDORED)
+    # For FetchContent Protobuf, we need to depend on the actual install marker file
+    # so that ExternalProject waits for the install to complete
+    add_custom_command(OUTPUT "${PROTOBUF_PREFIX}/.protobuf_installed_for_grpc"
+                       COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                               "${PROTOBUF_PREFIX}/.protobuf_installed"
+                               "${PROTOBUF_PREFIX}/.protobuf_installed_for_grpc"
+                       DEPENDS "${PROTOBUF_PREFIX}/.protobuf_installed"
+                       COMMENT "Marking Protobuf as ready for gRPC")
+    add_custom_target(protobuf_ready_for_grpc
+                      DEPENDS "${PROTOBUF_PREFIX}/.protobuf_installed_for_grpc")
+    add_dependencies(grpc_dependencies protobuf_ready_for_grpc)
+  endif()
 
   if(GFLAGS_VENDORED)
     add_dependencies(grpc_dependencies gflags_ep)
@@ -3250,9 +3315,15 @@ macro(build_grpc)
   add_dependencies(grpc_dependencies ${ARROW_PROTOBUF_LIBPROTOBUF} c-ares::cares
                    ZLIB::ZLIB)
 
-  get_target_property(GRPC_PROTOBUF_INCLUDE_DIR ${ARROW_PROTOBUF_LIBPROTOBUF}
-                      INTERFACE_INCLUDE_DIRECTORIES)
-  get_filename_component(GRPC_PB_ROOT "${GRPC_PROTOBUF_INCLUDE_DIR}" DIRECTORY)
+  # For FetchContent Protobuf, use the install prefix directly
+  if(PROTOBUF_VENDORED)
+    set(GRPC_PB_ROOT "${PROTOBUF_PREFIX}")
+  else()
+    get_target_property(GRPC_PROTOBUF_INCLUDE_DIR ${ARROW_PROTOBUF_LIBPROTOBUF}
+                        INTERFACE_INCLUDE_DIRECTORIES)
+    get_filename_component(GRPC_PB_ROOT "${GRPC_PROTOBUF_INCLUDE_DIR}" DIRECTORY)
+  endif()
+
   get_target_property(GRPC_Protobuf_PROTOC_LIBRARY ${ARROW_PROTOBUF_LIBPROTOC}
                       IMPORTED_LOCATION)
 
@@ -3922,11 +3993,6 @@ function(build_orc)
                         INTERFACE_INCLUDE_DIRECTORIES)
     get_filename_component(Protobuf_ROOT "${PROTOBUF_INCLUDE_DIR}" DIRECTORY)
     set(PROTOBUF_HOME ${Protobuf_ROOT})
-    # ORC uses this.
-    if(PROTOBUF_VENDORED)
-      target_include_directories(${ARROW_PROTOBUF_LIBPROTOC}
-                                 INTERFACE "${PROTOBUF_INCLUDE_DIR}")
-    endif()
     set(PROTOBUF_EXECUTABLE ${ARROW_PROTOBUF_PROTOC})
     set(PROTOBUF_LIBRARY ${ARROW_PROTOBUF_LIBPROTOBUF})
     set(PROTOC_LIBRARY ${ARROW_PROTOBUF_LIBPROTOC})
