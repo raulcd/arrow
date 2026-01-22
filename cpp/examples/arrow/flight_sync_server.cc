@@ -15,7 +15,11 @@ int GetThreadCount() {
   std::ifstream f("/proc/self/status");
   std::string field;
   while (f >> field) {
-    if (field == "Threads:") { int n; f >> n; return n; }
+    if (field == "Threads:") {
+      int n;
+      f >> n;
+      return n;
+    }
   }
   return -1;
 }
@@ -28,7 +32,8 @@ class SyncServer : public arrow::flight::FlightServerBase {
       std::unique_ptr<arrow::flight::FlightMessageWriter> writer) override {
     int cur = ++g_active;
     int peak = g_peak.load();
-    while (cur > peak && !g_peak.compare_exchange_weak(peak, cur)) {}
+    while (cur > peak && !g_peak.compare_exchange_weak(peak, cur)) {
+    }
 
     // Hold for 30 seconds (BLOCKING - this is the problem)
     std::this_thread::sleep_for(std::chrono::seconds(30));

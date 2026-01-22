@@ -14,8 +14,8 @@
 #include <grpcpp/support/byte_buffer.h>
 
 // Use the raw generated proto service (without Arrow's custom serialization)
-#include "arrow/flight/Flight.pb.h"
 #include "arrow/flight/Flight.grpc.pb.h"
+#include "arrow/flight/Flight.pb.h"
 
 namespace pb = arrow::flight::protocol;
 
@@ -26,18 +26,24 @@ int GetThreadCount() {
   std::ifstream f("/proc/self/status");
   std::string field;
   while (f >> field) {
-    if (field == "Threads:") { int n; f >> n; return n; }
+    if (field == "Threads:") {
+      int n;
+      f >> n;
+      return n;
+    }
   }
   return -1;
 }
 
 // Async reactor - holds connection for 30 seconds WITHOUT blocking a thread
-class AsyncDoExchangeReactor : public grpc::ServerBidiReactor<grpc::ByteBuffer, grpc::ByteBuffer> {
+class AsyncDoExchangeReactor
+    : public grpc::ServerBidiReactor<grpc::ByteBuffer, grpc::ByteBuffer> {
  public:
   AsyncDoExchangeReactor() : start_(std::chrono::steady_clock::now()) {
     int cur = ++g_active;
     int peak = g_peak.load();
-    while (cur > peak && !g_peak.compare_exchange_weak(peak, cur)) {}
+    while (cur > peak && !g_peak.compare_exchange_weak(peak, cur)) {
+    }
     StartRead(&request_);
   }
 
@@ -76,35 +82,50 @@ class AsyncFlightService final : public pb::FlightService::RawCallbackService {
 
   // Stub other methods
   grpc::ServerBidiReactor<grpc::ByteBuffer, grpc::ByteBuffer>* Handshake(
-      grpc::CallbackServerContext*) override { return nullptr; }
+      grpc::CallbackServerContext*) override {
+    return nullptr;
+  }
   grpc::ServerWriteReactor<grpc::ByteBuffer>* ListFlights(
-      grpc::CallbackServerContext*, const grpc::ByteBuffer*) override { return nullptr; }
+      grpc::CallbackServerContext*, const grpc::ByteBuffer*) override {
+    return nullptr;
+  }
   grpc::ServerUnaryReactor* GetFlightInfo(grpc::CallbackServerContext* ctx,
-      const grpc::ByteBuffer*, grpc::ByteBuffer*) override {
+                                          const grpc::ByteBuffer*,
+                                          grpc::ByteBuffer*) override {
     auto* r = ctx->DefaultReactor();
     r->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
     return r;
   }
   grpc::ServerUnaryReactor* PollFlightInfo(grpc::CallbackServerContext* ctx,
-      const grpc::ByteBuffer*, grpc::ByteBuffer*) override {
+                                           const grpc::ByteBuffer*,
+                                           grpc::ByteBuffer*) override {
     auto* r = ctx->DefaultReactor();
     r->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
     return r;
   }
   grpc::ServerUnaryReactor* GetSchema(grpc::CallbackServerContext* ctx,
-      const grpc::ByteBuffer*, grpc::ByteBuffer*) override {
+                                      const grpc::ByteBuffer*,
+                                      grpc::ByteBuffer*) override {
     auto* r = ctx->DefaultReactor();
     r->Finish(grpc::Status(grpc::StatusCode::UNIMPLEMENTED, ""));
     return r;
   }
   grpc::ServerWriteReactor<grpc::ByteBuffer>* DoGet(grpc::CallbackServerContext*,
-      const grpc::ByteBuffer*) override { return nullptr; }
+                                                    const grpc::ByteBuffer*) override {
+    return nullptr;
+  }
   grpc::ServerBidiReactor<grpc::ByteBuffer, grpc::ByteBuffer>* DoPut(
-      grpc::CallbackServerContext*) override { return nullptr; }
-  grpc::ServerWriteReactor<grpc::ByteBuffer>* ListActions(grpc::CallbackServerContext*,
-      const grpc::ByteBuffer*) override { return nullptr; }
+      grpc::CallbackServerContext*) override {
+    return nullptr;
+  }
+  grpc::ServerWriteReactor<grpc::ByteBuffer>* ListActions(
+      grpc::CallbackServerContext*, const grpc::ByteBuffer*) override {
+    return nullptr;
+  }
   grpc::ServerWriteReactor<grpc::ByteBuffer>* DoAction(grpc::CallbackServerContext*,
-      const grpc::ByteBuffer*) override { return nullptr; }
+                                                       const grpc::ByteBuffer*) override {
+    return nullptr;
+  }
 };
 
 int main(int argc, char** argv) {

@@ -27,14 +27,14 @@
 // Run:
 //   ./release/flight_thread_test --num_clients=100
 
+#include <sys/types.h>
+#include <unistd.h>
 #include <atomic>
 #include <chrono>
 #include <fstream>
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include <grpcpp/grpcpp.h>
 
@@ -78,11 +78,9 @@ class ThreadTestServer : public flight::FlightServerBase {
  public:
   explicit ThreadTestServer(int hold_seconds) : hold_seconds_(hold_seconds) {}
 
-  arrow::Status DoExchange(
-      const flight::ServerCallContext& context,
-      std::unique_ptr<flight::FlightMessageReader> reader,
-      std::unique_ptr<flight::FlightMessageWriter> writer) override {
-
+  arrow::Status DoExchange(const flight::ServerCallContext& context,
+                           std::unique_ptr<flight::FlightMessageReader> reader,
+                           std::unique_ptr<flight::FlightMessageWriter> writer) override {
     // Track concurrent handlers
     int current = ++g_active_handlers;
     int peak = g_peak_handlers.load();
@@ -150,7 +148,8 @@ int main(int argc, char** argv) {
   std::cout << "=== Flight Server Thread Test ===\n"
             << "Concurrent clients: " << num_clients << "\n"
             << "Hold time per request: " << hold_seconds << " seconds\n"
-            << "Max threads: " << (max_threads > 0 ? std::to_string(max_threads) : "unlimited") << "\n\n";
+            << "Max threads: "
+            << (max_threads > 0 ? std::to_string(max_threads) : "unlimited") << "\n\n";
 
   // Record baseline thread count
   int baseline_threads = GetThreadCount();
@@ -250,7 +249,9 @@ int main(int argc, char** argv) {
             << "Current thread count: " << active_threads << "\n"
             << "Threads created: " << (active_threads - baseline_threads) << "\n"
             << "Threads per handler (approx): "
-            << (active_handlers > 0 ? (float)(active_threads - baseline_threads) / active_handlers : 0)
+            << (active_handlers > 0
+                    ? (float)(active_threads - baseline_threads) / active_handlers
+                    : 0)
             << "\n\n";
 
   if (active_threads - baseline_threads >= num_clients * 0.8) {

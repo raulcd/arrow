@@ -222,7 +222,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_STANDARD GREATER_EQUAL 20)
                               transport/grpc/serialization_internal.cc
                               transport/grpc/protocol_grpc_internal.cc
                               transport/grpc/util_internal.cc
-                              PROPERTIES COMPILE_OPTIONS "${ARROW_FLIGHT_CXX20_WARNING_FLAGS}")
+                              PROPERTIES COMPILE_OPTIONS
+                                         "${ARROW_FLIGHT_CXX20_WARNING_FLAGS}")
 endif()
 
 add_arrow_lib(arrow_flight
@@ -337,10 +338,8 @@ if(ARROW_TESTING)
 
   # Suppress Abseil <ciso646> warnings in testing library (GCC 15+ with C++20)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_STANDARD GREATER_EQUAL 20)
-    set_source_files_properties(test_auth_handlers.cc
-                                test_definitions.cc
-                                test_flight_server.cc
-                                test_util.cc
+    set_source_files_properties(test_auth_handlers.cc test_definitions.cc
+                                test_flight_server.cc test_util.cc
                                 PROPERTIES COMPILE_OPTIONS "-Wno-cpp")
   endif()
 endif()
