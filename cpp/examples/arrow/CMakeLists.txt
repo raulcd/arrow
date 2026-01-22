@@ -127,6 +127,29 @@ if(ARROW_FLIGHT)
                     "${CMAKE_CURRENT_BINARY_DIR}/helloworld.pb.cc"
                     "${CMAKE_CURRENT_BINARY_DIR}/helloworld.grpc.pb.cc")
 
+  # HACK: Workaround absl::Mutex ABI incompatibility by making sure the
+  # non-debug version of Abseil is included
+  # (https://github.com/conda-forge/abseil-cpp-feedstock/issues/104,
+  # https://github.com/abseil/abseil-cpp/issues/1624)
+  target_compile_options(flight-grpc-example PRIVATE "-DNDEBUG")
+
+  # Simple test to demonstrate thread-per-request behavior in Flight
+  add_arrow_example(flight_thread_test EXTRA_LINK_LIBS ${FLIGHT_EXAMPLES_LINK_LIBS})
+
+  # Async vs Sync server comparison
+  add_arrow_example(flight_sync_server EXTRA_LINK_LIBS ${FLIGHT_EXAMPLES_LINK_LIBS})
+  add_arrow_example(flight_async_server EXTRA_LINK_LIBS ${FLIGHT_EXAMPLES_LINK_LIBS})
+  add_arrow_example(flight_simple_client EXTRA_LINK_LIBS ${FLIGHT_EXAMPLES_LINK_LIBS})
+
+  # Suppress Abseil <ciso646> warnings (GCC 15+ with C++20)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_STANDARD GREATER_EQUAL 20)
+    target_compile_options(flight-grpc-example PRIVATE "-Wno-cpp")
+    target_compile_options(flight-thread-test PRIVATE "-Wno-cpp")
+    target_compile_options(flight-sync-server PRIVATE "-Wno-cpp")
+    target_compile_options(flight-async-server PRIVATE "-Wno-cpp")
+    target_compile_options(flight-simple-client PRIVATE "-Wno-cpp")
+  endif()
+
   if(ARROW_FLIGHT_SQL)
     if(ARROW_BUILD_SHARED AND ARROW_GRPC_USE_SHARED)
       set(FLIGHT_SQL_EXAMPLES_LINK_LIBS arrow_flight_sql_shared)
@@ -143,6 +166,10 @@ if(ARROW_FLIGHT)
                       gRPC::grpc++
                       ${ARROW_PROTOBUF_LIBPROTOBUF}
                       ${GFLAGS_LIBRARIES})
+    # Suppress Abseil <ciso646> warnings (GCC 15+ with C++20)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_STANDARD GREATER_EQUAL 20)
+      target_compile_options(flight-sql-example PRIVATE "-Wno-cpp")
+    endif()
   endif()
 endif()
 
