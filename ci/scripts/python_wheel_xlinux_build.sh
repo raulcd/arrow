@@ -219,8 +219,11 @@ export ARROW_HOME=/tmp/arrow-dist
 # PyArrow build configuration
 export CMAKE_PREFIX_PATH=/tmp/arrow-dist
 
+# Meson sdist requires setuptools_scm to be able to get the version from git
+git config --global --add safe.directory /arrow
+
 pushd /arrow/python
-python -m build --wheel . \
+python -m build --sdist --wheel . \
     -Csetup-args="-Dbuildtype=${PYARROW_BUILD_TYPE}" \
     -Csetup-args="-Dacero=${PYARROW_WITH_ACERO}" \
     -Csetup-args="-Dazure=${PYARROW_WITH_AZURE}" \

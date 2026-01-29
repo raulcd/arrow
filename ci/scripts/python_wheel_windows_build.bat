@@ -193,6 +193,9 @@ if %ARROW_S3% == ON (
     set PYARROW_WITH_S3=auto
 )
 
+@REM Meson sdist requires setuptools_scm to be able to get the version from git
+git config --global --add safe.directory C:\arrow
+
 pushd C:\arrow\python
 
 @REM TODO: Remove once docker rebuild works correctly
@@ -200,7 +203,7 @@ pushd C:\arrow\python
 %PYTHON_CMD% -m pip install -U build  || exit /B 1
 
 @REM Build wheel
-%PYTHON_CMD% -m build --wheel . ^
+%PYTHON_CMD% -m build --sdist --wheel . ^
     -Csetup-args="-Dbuildtype=%CMAKE_BUILD_TYPE%" ^
     -Csetup-args="-Dacero=%PYARROW_WITH_ACERO%" ^
     -Csetup-args="-Ddataset=%PYARROW_WITH_DATASET%" ^

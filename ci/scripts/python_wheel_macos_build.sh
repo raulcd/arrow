@@ -228,8 +228,11 @@ export ARROW_HOME=${build_dir}/install
 # Set PyArrow version explicitly
 export SETUPTOOLS_SCM_PRETEND_VERSION=${PYARROW_VERSION}
 
+# Meson sdist requires setuptools_scm to be able to get the version from git
+git config --global --add safe.directory ${source_dir}
+
 pushd ${source_dir}/python
-python -m build --wheel . \
+python -m build --sdist --wheel . \
     -Csetup-args="-Dbuildtype=${PYARROW_BUILD_TYPE}" \
     -Csetup-args="-Dacero=${PYARROW_WITH_ACERO}" \
     -Csetup-args="-Dazure=${PYARROW_WITH_AZURE}" \
