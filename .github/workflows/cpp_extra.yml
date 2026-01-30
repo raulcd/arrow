@@ -502,5 +502,6 @@ jobs:
       - jni-macos
       - msvc-arm64
       - odbc
+      - odbc-nightly
     uses: ./.github/workflows/report_ci.yml
     secrets: inherit
