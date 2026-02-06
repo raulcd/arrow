@@ -365,6 +365,21 @@ if(ARROW_BUILD_TESTS)
                  ${ARROW_FLIGHT_TEST_LINK_LIBS}
                  LABELS
                  "arrow_flight")
+
+  # Standalone async server for thread count validation
+  add_executable(async-flight-server transport/grpc/async_server.cc)
+  target_link_libraries(async-flight-server ${ARROW_FLIGHT_TEST_LINK_LIBS})
+  target_compile_options(async-flight-server PRIVATE "-Wno-cpp")
+
+  # Standalone client for thread count validation
+  add_executable(flight-client transport/grpc/client.cc)
+  target_link_libraries(flight-client ${ARROW_FLIGHT_TEST_LINK_LIBS})
+  target_compile_options(flight-client PRIVATE "-Wno-cpp")
+
+  # Standalone sync server for thread count comparison
+  add_executable(sync-flight-server transport/grpc/sync_server.cc)
+  target_link_libraries(sync-flight-server ${ARROW_FLIGHT_TEST_LINK_LIBS})
+  target_compile_options(sync-flight-server PRIVATE "-Wno-cpp")
 endif()
 
 # Suppress Abseil <ciso646> warnings in test files (GCC 15+ with C++20)
