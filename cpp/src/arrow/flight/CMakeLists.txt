@@ -169,6 +169,12 @@ endif()
 # </KLUDGE> Restore the CXXFLAGS that were modified above
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_BACKUP}")
 
+# Suppress warnings from Abseil headers using deprecated <ciso646> in C++20.
+# GCC 15+ with C++20 emits #warning which -Werror turns into an error.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_STANDARD GREATER_EQUAL 20)
+  add_compile_options(-Wno-cpp)
+endif()
+
 # Note, we do not compile the generated gRPC sources directly, instead
 # compiling them via protocol_internal.cc which contains some gRPC template
 # overrides to enable Flight-specific optimizations. See comments in
@@ -329,6 +335,14 @@ add_arrow_test(flight_internals_test
                "arrow_flight")
 
 add_arrow_test(flight_test
+               STATIC_LINK_LIBS
+               ${ARROW_FLIGHT_TEST_LINK_LIBS}
+               LABELS
+               "arrow_flight")
+
+add_arrow_test(grpc_resource_quota_test
+               SOURCES
+               transport/grpc/grpc_resource_quota_test.cc
                STATIC_LINK_LIBS
                ${ARROW_FLIGHT_TEST_LINK_LIBS}
                LABELS

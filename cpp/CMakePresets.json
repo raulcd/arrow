@@ -112,7 +112,8 @@
       "hidden": true,
       "cacheVariables": {
         "ARROW_BUILD_STATIC": "ON",
-        "ARROW_FLIGHT": "ON"
+        "ARROW_FLIGHT": "ON",
+        "ARROW_BUILD_BENCHMARKS": "ON"
       }
     },
     {
