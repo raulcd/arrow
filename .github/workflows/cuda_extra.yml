@@ -49,7 +49,6 @@ permissions:
 
 jobs:
   check-labels:
-    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/check_labels.yml
     with:
       parent-workflow: cuda_extra
